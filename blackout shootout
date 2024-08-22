@@ -1,0 +1,181 @@
+import random
+import time
+
+# Player inventory and status
+inventory = {
+    "weapon": "pistol",  # Starting weapon
+    "ammo": 10,
+    "health": 100,
+    "armor": 0,
+    "gadgets": ["drone", "EMP grenade"],
+}
+
+def intro():
+    print("*****************************************")
+    print("*   Mission: Blackout Part 3            *")
+    print("*      Echoes of the Past               *")
+    print("*****************************************")
+    print("\nIt's been 10 years since you took down The Black Hand.")
+    print("But now, rumors of a revival threaten the world's stability.")
+    print("Your mission: Find and eliminate the new leader, known as 'The Echo,' before it's too late.\n")
+
+def choose_weapon():
+    print("\nBefore starting the mission, you can choose or upgrade your weapon:")
+    print("1. Pistol (Balanced, quick reload)")
+    print("2. Sniper Rifle (High damage, slow reload)")
+    print("3. Shotgun (Close range, powerful blast)")
+    print("4. Assault Rifle (Moderate damage, fast fire rate)")
+    while True:
+        choice = input("Choose your weapon (1, 2, 3, or 4): ").strip()
+        if choice == '1':
+            inventory["weapon"] = "pistol"
+            inventory["ammo"] = 12
+            print("You chose the Pistol. A reliable and balanced choice.")
+            break
+        elif choice == '2':
+            inventory["weapon"] = "sniper"
+            inventory["ammo"] = 6
+            print("You chose the Sniper Rifle. High damage but requires precision.")
+            break
+        elif choice == '3':
+            inventory["weapon"] = "shotgun"
+            inventory["ammo"] = 8
+            print("You chose the Shotgun. Devastating at close range.")
+            break
+        elif choice == '4':
+            inventory["weapon"] = "assault rifle"
+            inventory["ammo"] = 30
+            print("You chose the Assault Rifle. Versatile with a fast fire rate.")
+            break
+        else:
+            print("Invalid choice. Please select 1, 2, 3, or 4.")
+
+def use_gadget():
+    print("\nChoose a gadget to use:")
+    for i, gadget in enumerate(inventory["gadgets"], 1):
+        print(f"{i}. {gadget.capitalize()}")
+    choice = input("Select a gadget (or press Enter to cancel): ").strip()
+    if choice.isdigit() and 1 <= int(choice) <= len(inventory["gadgets"]):
+        selected_gadget = inventory["gadgets"][int(choice) - 1]
+        print(f"\nYou used the {selected_gadget}.")
+        if selected_gadget == "drone":
+            print("The drone scans the area, revealing enemy positions.")
+        elif selected_gadget == "emp grenade":
+            print("The EMP grenade disables all electronics in the area.")
+        inventory["gadgets"].remove(selected_gadget)
+    else:
+        print("You decided not to use a gadget.")
+
+def encounter_enemy(enemy_name):
+    print(f"\nYou encounter {enemy_name}! Prepare for a fight.")
+    time.sleep(1)
+
+    while inventory["ammo"] > 0:
+        print(f"\nYour weapon: {inventory['weapon'].capitalize()}, Ammo left: {inventory['ammo']}")
+        print("Type 'shoot' to fire, 'cover' to take cover, or 'gadget' to use a gadget.")
+        start_time = time.time()
+
+        user_input = input().strip().lower()
+        reaction_time = time.time() - start_time
+
+        if user_input == "shoot":
+            inventory["ammo"] -= 1
+            if reaction_time < 2.0:
+                print(f"Direct hit! You took down {enemy_name} with a reaction time of {reaction_time:.2f} seconds.")
+                return True
+            else:
+                print(f"You missed! {enemy_name} shot back.")
+                inventory["health"] -= random.randint(10, 30)
+                if inventory["health"] <= 0:
+                    print("You were critically wounded and failed the mission.")
+                    return False
+        elif user_input == "cover":
+            print("You took cover. The enemy's shots missed, but you didn't gain any ground.")
+        elif user_input == "gadget":
+            use_gadget()
+        else:
+            print("Invalid action. You hesitated and the enemy attacked.")
+            inventory["health"] -= random.randint(15, 25)
+            if inventory["health"] <= 0:
+                print("You were critically wounded and failed the mission.")
+                return False
+
+    print(f"You're out of ammo! {enemy_name} overpowered you. Mission failed.")
+    return False
+
+def solve_puzzle():
+    print("\nYou find a locked terminal containing critical intel. To access it, you must solve a complex puzzle.")
+    time.sleep(1)
+    num1 = random.randint(10, 50)
+    num2 = random.randint(10, 50)
+    correct_answer = num1 * num2
+
+    print(f"Step 1: Solve this puzzle to proceed: {num1} * {num2} = ?")
+    while True:
+        try:
+            player_answer = int(input("Enter your answer: ").strip())
+            if player_answer == correct_answer:
+                print("Correct! Step 1 complete.")
+                break
+            else:
+                print("Incorrect! The terminal locks tighter.")
+                inventory["health"] -= 10
+                if inventory["health"] <= 0:
+                    print("You failed to access the terminal and were discovered. Mission failed.")
+                    return False
+        except ValueError:
+            print("Please enter a valid number.")
+
+    print("Step 2: Hack the security system. This requires quick thinking.")
+    time_limit = 7
+    print(f"Hack the system within {time_limit} seconds or the alarm will sound!")
+
+    start_time = time.time()
+    input("Press Enter to hack...")
+    elapsed_time = time.time() - start_time
+
+    if elapsed_time <= time_limit:
+        print("You successfully hacked the system! The terminal unlocks.")
+        return True
+    else:
+        print(f"Too slow! The alarm sounds after {elapsed_time:.2f} seconds.")
+        inventory["health"] -= 15
+        if inventory["health"] <= 0:
+            print("You were overwhelmed by the enemy. Mission failed.")
+            return False
+
+def final_boss_battle():
+    print("\nYou face the final boss: The Echo.")
+    time.sleep(2)
+    if encounter_enemy("The Echo"):
+        print("\nAfter a grueling fight, you stand victorious over The Echo. The world is safe once again.")
+        return True
+    else:
+        print("\nYou have been defeated. The Echo's plans will now unfold unchecked.")
+        return False
+
+def main():
+    intro()
+    choose_weapon()
+    
+    print("\nYour mission begins...\n")
+    time.sleep(2)
+    
+    # First enemy encounter
+    if not encounter_enemy("Guard"):
+        print("\nThe mission ends in failure.")
+        return
+    
+    # Puzzle section
+    if not solve_puzzle():
+        print("\nThe mission ends in failure.")
+        return
+    
+    # Final boss battle
+    if not final_boss_battle():
+        print("\nMission failed.")
+    else:
+        print("\nMission accomplished!")
+
+if __name__ == "__main__":
+    main()
